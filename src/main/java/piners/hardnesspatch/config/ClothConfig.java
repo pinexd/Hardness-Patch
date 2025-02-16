@@ -39,7 +39,7 @@ public class ClothConfig {
                         new ArrayList<>(config.customHardnessMap.keySet())
                 )
                 .setAddButtonTooltip(Text.translatable("config.hardnesspatch.add_entry"))
-                .setRemoveButtonTooltip(Text.translatable("config.hardnesspatch.remove_entry"))
+                .setRemoveButtonTooltip(Text.translatable("config.hardnesspatch.broken"))
                 .setDefaultValue(List.of("minecraft:stone"))
                 .setSaveConsumer(newList -> updateConfigMap(config, newList))
                 .build());
