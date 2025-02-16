@@ -22,11 +22,15 @@ public class ClothConfig {
         HardnessPatchConfig config = AutoConfig.getConfigHolder(HardnessPatchConfig.class).getConfig();
 
         ConfigCategory category = builder.getOrCreateCategory(Text.translatable("config.hardnesspatch.category.main"));
+        category.addEntry(entry.startTextDescription(
+                Text.translatable("config.hardnesspatch.messageimmediate")
+                        .formatted(Formatting.ITALIC, Formatting.GREEN)
+        ).build());
 
         // Informational message
         category.addEntry(entry.startTextDescription(
                 Text.translatable("config.hardnesspatch.messageclient")
-                        .formatted(Formatting.ITALIC, Formatting.YELLOW)
+                        .formatted(Formatting.ITALIC, Formatting.GOLD)
         ).build());
 
         // Block list entry
