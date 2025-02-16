@@ -14,84 +14,65 @@ public class ClothConfig {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("config.hardnesspatch.title"))
-                .setSavingRunnable(() -> {
-                    AutoConfig.getConfigHolder(HardnessPatchConfig.class).save();
-                    HardnessPatchConfig.synchronizeFromServer(AutoConfig.getConfigHolder(HardnessPatchConfig.class).getConfig().customHardnessMap);
-                });
+                .setSavingRunnable(() ->
+                        AutoConfig.getConfigHolder(HardnessPatchConfig.class).save()
+                );
 
         ConfigEntryBuilder entry = builder.entryBuilder();
         HardnessPatchConfig config = AutoConfig.getConfigHolder(HardnessPatchConfig.class).getConfig();
 
         ConfigCategory category = builder.getOrCreateCategory(Text.translatable("config.hardnesspatch.category.main"));
 
-        // Add informational messages
-        category.addEntry(entry.startTextDescription(
-                Text.translatable("config.hardnesspatch.messageimmediate")
-                        .formatted(Formatting.ITALIC)
-                        .formatted(Formatting.GREEN)
-        ).build());
-
+        // Informational message
         category.addEntry(entry.startTextDescription(
                 Text.translatable("config.hardnesspatch.messageclient")
-                        .formatted(Formatting.ITALIC)
-                        .formatted(Formatting.RED)
+                        .formatted(Formatting.ITALIC, Formatting.YELLOW)
         ).build());
 
-        // Block ID list with direct removal handling
+        // Block list entry
         category.addEntry(entry.startStrList(
                         Text.translatable("config.hardnesspatch.entries"),
                         new ArrayList<>(config.customHardnessMap.keySet())
                 )
                 .setAddButtonTooltip(Text.translatable("config.hardnesspatch.add_entry"))
-                .setRemoveButtonTooltip(Text.translatable("config.hardnesspatch.broken"))
+                .setRemoveButtonTooltip(Text.translatable("config.hardnesspatch.remove_entry"))
                 .setDefaultValue(List.of("minecraft:stone"))
-                .setSaveConsumer(newList -> {
-                    Map<String, Float> newMap = new HashMap<>();
-                    for (String key : newList) {
-                        newMap.put(key, config.customHardnessMap.getOrDefault(key, 1.5f));
-                    }
-                    config.customHardnessMap.clear();
-                    config.customHardnessMap.putAll(newMap);
-                })
+                .setSaveConsumer(newList -> updateConfigMap(config, newList))
                 .build());
 
-        // Hardness values with proper dropdowns
-        config.customHardnessMap.forEach((blockId, hardness) -> {
-            category.addEntry(entry.startSubCategory(
-                            Text.literal(blockId),
-                            createHardnessEntry(blockId, hardness, config, entry))
-                    .setExpanded(false)
-                    .build());
-        });
+        // Add hardness entries
+        config.customHardnessMap.forEach((blockId, hardness) ->
+                category.addEntry(createBlockEntry(blockId, hardness, config, entry))
+        );
 
         this.screen = builder.build();
     }
 
-    private List<AbstractConfigListEntry> createHardnessEntry(String blockId, float hardness,
-                                                              HardnessPatchConfig config,
-                                                              ConfigEntryBuilder entry) {
-        List<AbstractConfigListEntry> entryElements = new ArrayList<>();
+    private void updateConfigMap(HardnessPatchConfig config, List<String> newList) {
+        Map<String, Float> newMap = new HashMap<>();
+        for (String key : newList) {
+            newMap.put(key, config.customHardnessMap.getOrDefault(key, 1.5f));
+        }
+        config.customHardnessMap.clear();
+        config.customHardnessMap.putAll(newMap);
+    }
 
-        // Hardness field
-        entryElements.add(entry.startFloatField(
-                        Text.translatable("config.hardnesspatch.hardness"),
-                        hardness)
-                .setDefaultValue(1.5f)
-                .setSaveConsumer(newValue -> config.customHardnessMap.put(blockId, newValue))
-                .build());
-
-        // Remove button
-        entryElements.add(entry.startBooleanToggle(
-                        Text.translatable("config.hardnesspatch.remove_entry"), false)
-                .setSaveConsumer(toggled -> {
-                    if (toggled) {
-                        config.customHardnessMap.remove(blockId);
-                    }
-                })
-                .setTooltip(Text.translatable("config.hardnesspatch.remove_tooltip"))
-                .build());
-
-        return entryElements;
+    private AbstractConfigListEntry<?> createBlockEntry(String blockId, float hardness,
+                                                        HardnessPatchConfig config,
+                                                        ConfigEntryBuilder entry) {
+        return entry.startSubCategory(
+                Text.literal(blockId),
+                Arrays.asList(
+                        entry.startFloatField(Text.translatable("config.hardnesspatch.hardness"), hardness)
+                                .setDefaultValue(1.5f)
+                                .setSaveConsumer(newValue -> config.customHardnessMap.put(blockId, newValue))
+                                .build(),
+                        entry.startBooleanToggle(Text.translatable("config.hardnesspatch.remove_entry"), false)
+                                .setSaveConsumer(toggled -> { if (toggled) config.customHardnessMap.remove(blockId); })
+                                .setTooltip(Text.translatable("config.hardnesspatch.remove_tooltip"))
+                                .build()
+                )
+        ).setExpanded(false).build();
     }
 
     public Screen getScreen() {

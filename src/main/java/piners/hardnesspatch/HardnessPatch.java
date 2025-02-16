@@ -2,6 +2,7 @@ package piners.hardnesspatch;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -16,10 +17,10 @@ import java.util.Map;
 
 public class HardnessPatch implements ModInitializer {
     public static final Map<Block, Float> customHardnessMap = new HashMap<>();
+
     public static void broadcastConfigUpdate() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
             Map<String, Float> config = getServerConfig();
-            // Correct method for Fabric Loader 0.16.10
             MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
             server.getPlayerManager().getPlayerList().forEach(player ->
                     NetworkHandler.sendConfigToPlayer(config, player)
@@ -29,15 +30,21 @@ public class HardnessPatch implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
-            ConfigLoader.loadConfig();
-            ConfigLoader.startFileWatcher();
-        }
-
+        // Register payload type FIRST
         PayloadTypeRegistry.playS2C().register(
                 NetworkHandler.ID,
                 NetworkHandler.CODEC
         );
+
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+            ConfigLoader.loadConfig();
+            ConfigLoader.startFileWatcher();
+
+            // Add server stop hook
+            ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+                ConfigLoader.stopFileWatcher();
+            });
+        }
 
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
             ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->

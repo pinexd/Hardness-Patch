@@ -19,7 +19,8 @@
 			"piners.hardnesspatch.HardnessPatch"
 		],
 		"client": [
-			"piners.hardnesspatch.HardnessPatchClient"
+			"piners.hardnesspatch.HardnessPatchClient",
+			"piners.hardnesspatch.ConnectionHandler"
 		],
 		"modmenu": [
 			"piners.hardnesspatch.config.ModMenuIntegration"

@@ -9,7 +9,7 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import piners.hardnesspatch.config.HardnessPatchConfig;
+import piners.hardnesspatch.HardnessPatchClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,19 +49,18 @@ public class NetworkHandler implements CustomPayload {
         return ID;
     }
 
-    // Client-side handling
     @Environment(EnvType.CLIENT)
     public static class Client {
         public static void initialize() {
+            // Only register receiver, type is registered by server
             ClientPlayNetworking.registerGlobalReceiver(ID, (payload, context) -> {
                 context.client().execute(() -> {
-                    HardnessPatchConfig.synchronizeFromServer(payload.config);
+                    HardnessPatchClient.setServerConfig(payload.config);
                 });
             });
         }
     }
 
-    // Server-side sending
     public static void sendConfigToPlayer(Map<String, Float> config, ServerPlayerEntity player) {
         ServerPlayNetworking.send(player, new NetworkHandler(config));
     }

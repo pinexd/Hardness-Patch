@@ -6,6 +6,9 @@
 	"mixins": [
 		"HardnessMixin"
 	],
+	"client": [
+		"client.HardnessClientMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}

@@ -106,6 +106,20 @@ public class ConfigLoader {
         }, 5, 5, TimeUnit.SECONDS);
     }
 
+    public static void stopFileWatcher() {
+        if (executor != null) {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(1, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     public static class HardnessPatchConfig {
         public Map<String, Float> customHardnessMap = new HashMap<>();
     }

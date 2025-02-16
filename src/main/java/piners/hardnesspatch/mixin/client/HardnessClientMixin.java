@@ -1,5 +1,7 @@
-package piners.hardnesspatch.mixin;
+package piners.hardnesspatch.mixin.client;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -9,21 +11,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import piners.hardnesspatch.HardnessPatch;
+import piners.hardnesspatch.HardnessPatchClient;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
-public abstract class HardnessMixin {
+@Environment(EnvType.CLIENT)
+public abstract class HardnessClientMixin {
     @Inject(
             method = "getHardness(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F",
             at = @At("HEAD"),
             cancellable = true
     )
-    private void modifyHardness(BlockView world, BlockPos pos, CallbackInfoReturnable<Float> cir) {
+    private void modifyClientHardness(BlockView world, BlockPos pos, CallbackInfoReturnable<Float> cir) {
         BlockState state = (BlockState) (Object) this;
-        Block block = state.getBlock();
-
-        Float hardness = HardnessPatch.customHardnessMap.get(block);
-        if (hardness != null) {
+        float hardness = HardnessPatchClient.getAdjustedHardness(state.getBlock());
+        if (hardness != state.getBlock().getHardness()) {
             cir.setReturnValue(hardness);
         }
     }
