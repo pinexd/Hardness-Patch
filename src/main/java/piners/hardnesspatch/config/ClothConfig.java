@@ -1,5 +1,6 @@
 package piners.hardnesspatch.config;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.clothconfig2.api.*;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
@@ -14,21 +15,27 @@ public class ClothConfig {
                 .setParentScreen(parent)
                 .setTitle(Text.translatable("config.hardnesspatch.title"))
                 .setSavingRunnable(() -> {
-                    HardnessPatchConfig.saveConfig();
-                    HardnessPatchConfig.synchronizeConfig();
+                    AutoConfig.getConfigHolder(HardnessPatchConfig.class).save();
+                    HardnessPatchConfig.synchronizeFromServer(AutoConfig.getConfigHolder(HardnessPatchConfig.class).getConfig().customHardnessMap);
                 });
 
         ConfigEntryBuilder entry = builder.entryBuilder();
-        HardnessPatchConfig config = HardnessPatchConfig.getConfig();
+        HardnessPatchConfig config = AutoConfig.getConfigHolder(HardnessPatchConfig.class).getConfig();
 
         ConfigCategory category = builder.getOrCreateCategory(Text.translatable("config.hardnesspatch.category.main"));
 
-        // Add a text description informing the user that changes take effect immediately
+        // Add informational messages
         category.addEntry(entry.startTextDescription(
                 Text.translatable("config.hardnesspatch.messageimmediate")
-                        .formatted(Formatting.ITALIC) // Make the text italic
-                        .formatted(Formatting.GREEN)   // Change the text color to gray
-        ).build()); // Correctly close the startTextDescription method
+                        .formatted(Formatting.ITALIC)
+                        .formatted(Formatting.GREEN)
+        ).build());
+
+        category.addEntry(entry.startTextDescription(
+                Text.translatable("config.hardnesspatch.messageclient")
+                        .formatted(Formatting.ITALIC)
+                        .formatted(Formatting.RED)
+        ).build());
 
         // Block ID list with direct removal handling
         category.addEntry(entry.startStrList(
@@ -39,12 +46,10 @@ public class ClothConfig {
                 .setRemoveButtonTooltip(Text.translatable("config.hardnesspatch.broken"))
                 .setDefaultValue(List.of("minecraft:stone"))
                 .setSaveConsumer(newList -> {
-                    // Create a new map with only the listed entries
                     Map<String, Float> newMap = new HashMap<>();
                     for (String key : newList) {
                         newMap.put(key, config.customHardnessMap.getOrDefault(key, 1.5f));
                     }
-                    // Completely replace the map
                     config.customHardnessMap.clear();
                     config.customHardnessMap.putAll(newMap);
                 })

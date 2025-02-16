@@ -1,14 +1,16 @@
 package piners.hardnesspatch;
 
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import piners.hardnesspatch.config.HardnessPatchConfig;
+import piners.hardnesspatch.network.NetworkHandler;
 
-@Environment(EnvType.CLIENT)
 public class HardnessPatchClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // Client-side initialization if needed
+        // Register config and network
+        AutoConfig.register(HardnessPatchConfig.class, JanksonConfigSerializer::new);
+        NetworkHandler.Client.initialize();
     }
 }

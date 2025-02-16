@@ -16,7 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-          "piners.hardnesspatch.HardnessPatch"
+			"piners.hardnesspatch.HardnessPatch"
 		],
 		"client": [
 			"piners.hardnesspatch.HardnessPatchClient"

@@ -2,7 +2,6 @@ package piners.hardnesspatch.mixin;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,11 +18,12 @@ public abstract class HardnessMixin {
             cancellable = true
     )
     private void modifyHardness(BlockView world, BlockPos pos, CallbackInfoReturnable<Float> cir) {
-        BlockState state = (BlockState) (Object) this;
+        AbstractBlock.AbstractBlockState state = (AbstractBlock.AbstractBlockState) (Object) this;
         Block block = state.getBlock();
 
-        if (HardnessPatch.customHardnessMap.containsKey(block)) {
-            cir.setReturnValue(HardnessPatch.customHardnessMap.get(block));
+        Float hardness = HardnessPatch.customHardnessMap.get(block);
+        if (hardness != null) {
+            cir.setReturnValue(hardness);
         }
     }
 }

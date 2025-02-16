@@ -1,43 +1,56 @@
 package piners.hardnesspatch;
 
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import piners.hardnesspatch.config.HardnessPatchConfig;
+import net.minecraft.registry.Registries;
+import net.minecraft.server.MinecraftServer;
+import piners.hardnesspatch.config.ConfigLoader;
+import piners.hardnesspatch.network.NetworkHandler;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class HardnessPatch implements ModInitializer {
-    public static final String MOD_ID = "hardnesspatch";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final Map<Block, Float> customHardnessMap = new HashMap<>();
+    public static void broadcastConfigUpdate() {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+            Map<String, Float> config = getServerConfig();
+            // Correct method for Fabric Loader 0.16.10
+            MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+            server.getPlayerManager().getPlayerList().forEach(player ->
+                    NetworkHandler.sendConfigToPlayer(config, player)
+            );
+        }
+    }
 
     @Override
     public void onInitialize() {
-        HardnessPatchConfig.initialize();
-        HardnessPatchConfig.synchronizeConfig();
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+            ConfigLoader.loadConfig();
+            ConfigLoader.startFileWatcher();
+        }
 
-        ServerWorldEvents.LOAD.register((server, world) -> {
-            HardnessPatchConfig.synchronizeConfig();
-        });
+        PayloadTypeRegistry.playS2C().register(
+                NetworkHandler.ID,
+                NetworkHandler.CODEC
+        );
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            dispatcher.register(LiteralArgumentBuilder.<ServerCommandSource>literal("reloadHardnessConfig")
-                    .requires(source -> source.hasPermissionLevel(2))
-                    .executes(context -> {
-                        HardnessPatchConfig.synchronizeConfig();
-                        context.getSource().sendFeedback(() ->
-                                Text.literal("Hardness config reloaded"), false);
-                        return Command.SINGLE_SUCCESS;
-                    }));
-        });
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+            ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+                    NetworkHandler.sendConfigToPlayer(getServerConfig(), handler.player)
+            );
+        }
+    }
+
+    private static Map<String, Float> getServerConfig() {
+        Map<String, Float> config = new HashMap<>();
+        customHardnessMap.forEach((block, value) ->
+                config.put(Registries.BLOCK.getId(block).toString(), value)
+        );
+        return config;
     }
 }

@@ -42,7 +42,7 @@ dependencies {
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modImplementation include("blue.endless:jankson:1.2.3")
 	modImplementation "io.github.cottonmc:Jankson-Fabric:9.0.0+j1.2.3"
-
+	modImplementation "net.fabricmc.fabric-api:fabric-networking-api-v1:1.0.0+"
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}

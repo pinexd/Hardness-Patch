@@ -14,5 +14,6 @@
   "config.hardnesspatch.hardness_for": "Hardness for %s",
   "config.hardnesspatch.default_hardness": "Default Hardness",
   "config.hardnesspatch.broken": "Please use the delete toggle in the entry for a block instead",
-  "config.hardnesspatch.messageimmediate": "No need to restart your client, changes apply immediately."
+  "config.hardnesspatch.messageimmediate": "No need to restart your client, changes apply immediately.",
+  "config.hardnesspatch.messageclient": "This is client only config!"
 }
