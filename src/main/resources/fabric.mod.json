@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "hardnesspatch",
+	"version": "${version}",
+	"name": "Hardness Patch",
+	"description": "Allows users to customize the hardness values for any block, via a config.",
+	"authors": [
+		"piners"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/hardnesspatch/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+          "piners.hardnesspatch.HardnessPatch"
+		],
+		"client": [
+			"piners.hardnesspatch.HardnessPatchClient"
+		],
+		"modmenu": [
+			"piners.hardnesspatch.config.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"hardnesspatch.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": ">=17.0.0"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}

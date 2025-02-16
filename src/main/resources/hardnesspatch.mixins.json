@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"verbose": true,
+	"package": "piners.hardnesspatch.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"HardnessMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
